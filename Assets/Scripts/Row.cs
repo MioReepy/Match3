@@ -1,18 +1,20 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Row : MonoBehaviour
+public sealed class Row : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public List<Tile> Tiles = new List<Tile>();
+    
+    private void Awake()
     {
-        
+        CountTiles();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void CountTiles()
     {
-        
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Tiles.Add(transform.GetChild(i).GetComponent<Tile>());
+        }
     }
 }

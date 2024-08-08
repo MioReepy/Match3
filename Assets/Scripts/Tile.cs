@@ -1,18 +1,36 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Tile : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public int x;
+    public int y;
+
+    private Item _item;
+    private Image Icon;
+    private Button ButtonTile;
+    
+    public Item Item
     {
-        
+        get => _item;
+        set
+        {
+            if (_item == value) return;
+
+            _item = value;
+            Icon.sprite = _item.IconSprite;
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Awake()
     {
-        
+        Icon = gameObject.GetComponent<Image>();
+        ButtonTile = gameObject.GetComponent<Button>();
+    }
+
+    private void Start()
+    {
+         ButtonTile.onClick.AddListener(() => Board.Instance.Select(this));
     }
 }
