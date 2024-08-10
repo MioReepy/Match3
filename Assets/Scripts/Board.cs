@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,41 +8,47 @@ using Random = UnityEngine.Random;
 public class Board : MonoBehaviour
 {
     public static Board Instance { get; private set; }
-    public Tile[][] Tiles { get; private set; }
+    public Tile[,] Tiles { get; private set; }
+
+    public Row[] Rows;
+
+    public int Width => Tiles.GetLength(0);
+    public int Height => Tiles.GetLength(1);
 
     private readonly List<Tile> _selection = new List<Tile>();
+    
     private const float _tweenDuration = 0.25f;
     private void Awake() => Instance = this;
 
     private void Start()
     {
-        Tiles = new Tile[gameObject.transform.childCount][];
-
-        for (int x = 0; x < transform.childCount; x++)
+        Rows = new Row[gameObject.transform.childCount];
+            
+        for (int i = 0; i < gameObject.transform.childCount; i++)
         {
-            Tiles[x] = new Tile[transform.GetChild(x).GetComponent<Row>().Tiles.Count]; 
-                
-            for (int y = 0; y < Tiles[x].Length; y++)
+            Rows[i] = gameObject.transform.GetChild(i).GetComponent<Row>();
+        }
+        
+        Tiles = new Tile[Rows.Max(row => row.Tiles.Count), Rows.Length];
+
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
             {
-                var title = transform.GetChild(x).GetComponent<Row>().Tiles[y];
+                // if (gameObject.transform.GetChild(y).GetComponent<Row>()._startIndex > 0)
+                // {
+                //     Tiles[y][x] = null;
+                // }
+                
+                var title = Rows[y].Tiles[x];
                 
                 title.Item = ItemDataBase.Items[Random.Range(0, ItemDataBase.Items.Length)];
                 
                 title.x = x;
                 title.y = y;
 
-                Tiles[x][y] = title;
+                Tiles[x, y] = title;
             }
-        }
-    }
-
-    private void Update()
-    {
-        if (!Input.GetKeyDown(KeyCode.A)) return;
-
-        foreach (var VARIABLE in Tiles[0][0].GetConnectedTiles())
-        {
-            VARIABLE.Icon.transform.DOScale(1.25f, _tweenDuration).Play();
         }
     }
 
@@ -51,23 +56,17 @@ public class Board : MonoBehaviour
     {
         if (!_selection.Contains(tile))
         {
-            // if (_selection.Count > 0 && Array.IndexOf(_selection[0].Neighbours, tile) != -1)
-            // {
-            //     _selection.Add(tile);
-            // }
-            // else
-            // {
-                _selection.Add(tile);
-            // }
+            _selection.Add(tile);
         }
 
         if (_selection.Count < 2) return;
 
         await Swap(_selection[0], _selection[1]);
-        
+
         if (CanPop())
         {
-            // Pop();
+            Debug.Log(CanPop());
+            Pop();
         }
         else
         {
@@ -105,11 +104,11 @@ public class Board : MonoBehaviour
 
     private bool CanPop()
     {
-        for (int x = 0; x < Tiles.Length; x++)
+        for (int y = 0; y < Height; y++)
         {
-            for (int y = 0; y < Tiles[x].Length; y++)
+            for (int x = 0; x < Width; x++)
             {
-                if (Tiles[x][y].GetConnectedTiles().Skip(1).Count() >= 2)
+                if (Tiles[x, y].GetConnectedTiles().Skip(1).Count() >= 2)
                 {
                     return true;
                 }
@@ -119,43 +118,40 @@ public class Board : MonoBehaviour
         return false;
     }
     
-    // private async void Pop()
-    // {
-    //     for (int x = 0; x < Tiles.Length; x++)
-    //     {
-    //         for (int y = 0; y < Tiles[x].Length; y++)
-    //         {
-    //             if (Tiles[x][y].GetConnectedTiles().Skip(1).Count() >= 2)
-    //             {
-    //                 var tile = Tiles[x][y];
-    //                 var connectedTiles = tile.GetConnectedTiles();
-    //                 
-    //                 if (connectedTiles.Skip(1).Count() < 2) continue;
-    //
-    //                 var deflateSequence = DOTween.Sequence();
-    //
-    //                 foreach (var connectedTile in connectedTiles)
-    //                 {
-    //                     deflateSequence.Join(connectedTile.Icon.transform.DOScale(Vector3.zero, _tweenDuration));
-    //                 }
-    //
-    //                 await deflateSequence.Play().AsyncWaitForCompletion();
-    //                 
-    //                 var inFlateSequence = DOTween.Sequence();
-    //                 
-    //                 foreach (var connectedTile in connectedTiles)
-    //                 {
-    //                     connectedTile.Item = ItemDataBase.Items[Random.Range(0, ItemDataBase.Items.Length)];
-    //                     inFlateSequence.Join((connectedTile.Icon.transform.DOScale(Vector3.one, _tweenDuration)));
-    //                 }
-    //
-    //                 await inFlateSequence.Play().AsyncWaitForCompletion();
-    //
-    //                 x = 0;
-    //                 y = 0;
-    //             }
-    //         }
-    //     }
-    // }
+    private async void Pop()
+    {
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                var tile = Tiles[x, y];
+                var connectedTiles = tile.GetConnectedTiles();
+
+                if (connectedTiles.Skip(1).Count() < 2) continue;
+
+                var deflateSequence = DOTween.Sequence();
+
+                foreach (var connectedTile in connectedTiles)
+                {
+                    deflateSequence.Join(connectedTile.Icon.transform.DOScale(Vector3.zero, _tweenDuration));
+                }
+
+                await deflateSequence.Play().AsyncWaitForCompletion();
+
+                var inFlateSequence = DOTween.Sequence();
+
+                foreach (var connectedTile in connectedTiles)
+                {
+                    connectedTile.Item = ItemDataBase.Items[Random.Range(0, ItemDataBase.Items.Length)];
+                    inFlateSequence.Join((connectedTile.Icon.transform.DOScale(Vector3.one, _tweenDuration)));
+                }
+
+                await inFlateSequence.Play().AsyncWaitForCompletion();
+
+                x = 0;
+                y = 0;
+            }
+        }
+    }
 }
     

@@ -23,10 +23,10 @@ public class Tile : MonoBehaviour
         }
     }
 
-    public Tile Left => x > 0 ? Board.Instance.Tiles[x - 1] [y] : null;
-    public Tile Right => x < Board.Instance.Tiles[x].Length ? Board.Instance.Tiles[x + 1] [y] : null;
-    public Tile Top => y > 0 ? Board.Instance.Tiles[x] [y - 1] : null;
-    public Tile Bottom => y < Board.Instance.Tiles.Length ? Board.Instance.Tiles[x] [y + 1] : null;
+    public Tile Left => x > 0 ? Board.Instance.Tiles[x - 1, y] : null;
+    public Tile Right => x < Board.Instance.Width - 1 ? Board.Instance.Tiles[x + 1, y] : null;
+    public Tile Top => y > 0 ? Board.Instance.Tiles[x, y - 1] : null;
+    public Tile Bottom => y < Board.Instance.Height - 1 ? Board.Instance.Tiles[x, y + 1] : null;
 
     public Tile[] Neighbours => new[]
     {
