@@ -9,7 +9,7 @@ public class Tile : MonoBehaviour
 
     private Item _item;
     internal Image Icon;
-    private Button ButtonTile;
+    private Button _buttonTile;
     
     public Item Item
     {
@@ -39,12 +39,12 @@ public class Tile : MonoBehaviour
     private void Awake()
     {
         Icon = gameObject.transform.GetChild(0).GetComponent<Image>();
-        ButtonTile = gameObject.transform.GetChild(0).GetComponent<Button>();
+        _buttonTile = gameObject.GetComponent<Button>();
     }
 
     private void Start()
     {
-         ButtonTile.onClick.AddListener(() => Board.Instance.Select(this));
+        _buttonTile.onClick.AddListener(() => Board.Instance.Select(this));
     }
 
     public List<Tile> GetConnectedTiles(List<Tile> exluse = null)

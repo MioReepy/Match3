@@ -93,9 +93,9 @@ public class Board : MonoBehaviour
         tile1.Icon = icon2;
         tile2.Icon = icon1;
 
-        var tile1Item = tile1.Item;
+        var tempItem = tile1.Item;
         tile1.Item = tile2.Item;
-        tile2.Item = tile1Item;
+        tile2.Item = tempItem;
     }
 
     // private void CanPop()
