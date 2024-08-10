@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9186329599e1e4f90774d9e17fc288, type: 3}
   m_Name: Apple
   m_EditorClassIdentifier: 
-  IconSprite: {fileID: 21300000, guid: a292bddf8693e00428dace4a7f770aa6, type: 3}
+  IconSprite: {fileID: 21300000, guid: b7481a4c424715542a70ac1efc7468db, type: 3}
   Score: 10
