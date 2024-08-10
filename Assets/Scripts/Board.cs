@@ -18,6 +18,9 @@ public class Board : MonoBehaviour
     private readonly List<Tile> _selection = new List<Tile>();
     
     private const float _tweenDuration = 0.25f;
+
+    [SerializeField] private AudioClip _audioClip;
+    [SerializeField] private AudioSource _audioSource;
     private void Awake() => Instance = this;
 
     private void Start()
@@ -135,11 +138,13 @@ public class Board : MonoBehaviour
                 {
                     deflateSequence.Join(connectedTile.Icon.transform.DOScale(Vector3.zero, _tweenDuration));
                 }
-
-                await deflateSequence.Play().AsyncWaitForCompletion();
-
+                
+                _audioSource.PlayOneShot(_audioClip);
+                
                 ScoreBoard.Instance.Score += tile.Item.Score * connectedTiles.Count;
-
+                
+                await deflateSequence.Play().AsyncWaitForCompletion();
+                
                 var inFlateSequence = DOTween.Sequence();
 
                 foreach (var connectedTile in connectedTiles)
