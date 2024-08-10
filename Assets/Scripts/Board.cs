@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Board : MonoBehaviour
 {
@@ -34,16 +37,42 @@ public class Board : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (!Input.GetKeyDown(KeyCode.A)) return;
+
+        foreach (var VARIABLE in Tiles[0][0].GetConnectedTiles())
+        {
+            VARIABLE.Icon.transform.DOScale(1.25f, _tweenDuration).Play();
+        }
+    }
+
     public async void Select(Tile tile)
     {
         if (!_selection.Contains(tile))
         {
-            _selection.Add(tile);
+            // if (_selection.Count > 0 && Array.IndexOf(_selection[0].Neighbours, tile) != -1)
+            // {
+            //     _selection.Add(tile);
+            // }
+            // else
+            // {
+                _selection.Add(tile);
+            // }
         }
-        
+
         if (_selection.Count < 2) return;
 
         await Swap(_selection[0], _selection[1]);
+        
+        if (CanPop())
+        {
+            // Pop();
+        }
+        else
+        {
+            await Swap(_selection[0], _selection[1]);
+        }
         
         _selection.Clear();
     }
@@ -57,6 +86,7 @@ public class Board : MonoBehaviour
         var icon2Transform = icon2.transform;
 
         var sequence = DOTween.Sequence();
+        
         sequence.Join(icon1Transform.DOMove(icon2Transform.position, _tweenDuration))
                 .Join(icon2Transform.DOMove(icon1Transform.position, _tweenDuration));
 
@@ -73,14 +103,59 @@ public class Board : MonoBehaviour
         tile2.Item = tempItem;
     }
 
-    // private void CanPop()
+    private bool CanPop()
+    {
+        for (int x = 0; x < Tiles.Length; x++)
+        {
+            for (int y = 0; y < Tiles[x].Length; y++)
+            {
+                if (Tiles[x][y].GetConnectedTiles().Skip(1).Count() >= 2)
+                {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    // private async void Pop()
     // {
-    //     
-    // }
+    //     for (int x = 0; x < Tiles.Length; x++)
+    //     {
+    //         for (int y = 0; y < Tiles[x].Length; y++)
+    //         {
+    //             if (Tiles[x][y].GetConnectedTiles().Skip(1).Count() >= 2)
+    //             {
+    //                 var tile = Tiles[x][y];
+    //                 var connectedTiles = tile.GetConnectedTiles();
+    //                 
+    //                 if (connectedTiles.Skip(1).Count() < 2) continue;
     //
-    // private void Pop()
-    // {
-    //     
+    //                 var deflateSequence = DOTween.Sequence();
+    //
+    //                 foreach (var connectedTile in connectedTiles)
+    //                 {
+    //                     deflateSequence.Join(connectedTile.Icon.transform.DOScale(Vector3.zero, _tweenDuration));
+    //                 }
+    //
+    //                 await deflateSequence.Play().AsyncWaitForCompletion();
+    //                 
+    //                 var inFlateSequence = DOTween.Sequence();
+    //                 
+    //                 foreach (var connectedTile in connectedTiles)
+    //                 {
+    //                     connectedTile.Item = ItemDataBase.Items[Random.Range(0, ItemDataBase.Items.Length)];
+    //                     inFlateSequence.Join((connectedTile.Icon.transform.DOScale(Vector3.one, _tweenDuration)));
+    //                 }
+    //
+    //                 await inFlateSequence.Play().AsyncWaitForCompletion();
+    //
+    //                 x = 0;
+    //                 y = 0;
+    //             }
+    //         }
+    //     }
     // }
 }
     
